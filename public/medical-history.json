@@ -1,0 +1,83 @@
+[
+  {
+    "id": 1,
+    "date": "2024-01-15",
+    "type": "Consultation",
+    "doctor": "Dr. Sarah Johnson",
+    "diagnosis": "Annual Physical Exam",
+    "notes": "Patient in good health. Recommended annual follow-up.",
+    "status": "Completed"
+  },
+  {
+    "id": 2,
+    "date": "2023-12-08",
+    "type": "Lab Results",
+    "doctor": "Dr. Michael Chen",
+    "diagnosis": "Blood Panel - Normal",
+    "notes": "All values within normal range. Cholesterol slightly elevated.",
+    "status": "Reviewed"
+  },
+  {
+    "id": 3,
+    "date": "2023-11-22",
+    "type": "Prescription",
+    "doctor": "Dr. Emily Rodriguez",
+    "diagnosis": "Migraine Treatment",
+    "notes": "Prescribed Sumatriptan 50mg as needed for migraine episodes.",
+    "status": "Active"
+  },
+  {
+    "type": "Lab Results",
+    "diagnosis": "AI Report Analysis - Chest Pain",
+    "notes": "Ms. Rogers is a 56-year-old woman presenting with concerning symptoms of chest pain, shortness of breath, and high blood pressure.  The chest pain suggests potential angina (heart-related pain), made more concerning by the presence of a heart murmur, elevated blood pressure, and a family history of early heart disease.  Abnormal findings in the lungs suggest potential fluid buildup.  These findings, together with her other risk factors, strongly indicate a need for immediate cardiac evaluation and intervention to prevent a serious heart event.",
+    "doctor": "AI Analyzer",
+    "status": "Reviewed",
+    "id": 4,
+    "date": "2025-06-25"
+  },
+  {
+    "type": "Lab Results",
+    "diagnosis": "AI Report Analysis - Chest Pain",
+    "notes": "Ms. Rogers, a 56-year-old woman, presented with concerning chest pain that has worsened over the past week, occurring both during exertion and at rest.  Her blood pressure is significantly elevated, and her physical examination revealed concerning heart sounds (murmur and extra heart sound), lung sounds suggesting fluid, and an abdominal bruit. These findings, coupled with a family history of early-onset heart disease and her other risk factors, strongly suggest the possibility of unstable angina (a severe form of chest pain indicating severely restricted blood flow to the heart) and potential heart failure.  Urgent investigation and treatment are necessary.",
+    "doctor": "AI Analyzer",
+    "status": "Reviewed",
+    "id": 5,
+    "date": "2025-06-25"
+  },
+  {
+    "type": "Lab Results",
+    "diagnosis": "AI Report Analysis - Chest Pain",
+    "notes": "Ms. Rogers, a 56-year-old woman, presented to the emergency department with worsening chest pain over the past week, accompanied by shortness of breath.  Her examination revealed high blood pressure, a concerning heart murmur, abnormal lung sounds (crackles), and an abdominal bruit.  Her family history of early heart disease and recent onset hypertension are significant risk factors. The combination of these findings strongly suggests a serious heart issue, possibly unstable angina or congestive heart failure, requiring immediate medical attention and further investigation.",
+    "doctor": "AI Analyzer",
+    "status": "Reviewed",
+    "id": 6,
+    "date": "2025-06-25"
+  },
+  {
+    "type": "Lab Results",
+    "diagnosis": "AI Report Analysis - Hemoglobin",
+    "notes": "Your blood test shows slightly low hemoglobin and red blood cell counts, suggesting a possible mild anemia.  While other blood cell parameters are within normal limits or borderline, the low hemoglobin warrants further investigation to determine the underlying cause.  Your doctor will likely want to discuss this further and possibly order additional tests.",
+    "doctor": "AI Analyzer",
+    "status": "Reviewed",
+    "id": 7,
+    "date": "2025-06-26"
+  },
+  {
+    "type": "Lab Results",
+    "diagnosis": "AI Report Analysis - Chest Pain",
+    "notes": "Your medical report shows concerning signs suggesting potential unstable angina (a serious type of chest pain), high blood pressure, and possible heart valve or muscle issues.  The shortness of breath and abnormal lung sounds may indicate heart failure. Your family history and abnormal abdominal sound raise additional concerns.  Immediate medical attention is necessary to rule out serious conditions and begin appropriate treatment.",
+    "doctor": "AI Analyzer",
+    "status": "Reviewed",
+    "id": 8,
+    "date": "2025-06-26"
+  },
+  {
+    "type": "Lab Results",
+    "diagnosis": "AI Report Analysis - Temperature",
+    "notes": "Your doctor suspects you have a mild viral infection causing your fever and headache.  The medication prescribed should help manage your symptoms.  It's important to rest, stay hydrated, and monitor your symptoms closely.  Let your doctor know if your symptoms worsen or don't improve.",
+    "doctor": "AI Analyzer",
+    "status": "Reviewed",
+    "id": 9,
+    "date": "2025-06-26"
+  }
+]
