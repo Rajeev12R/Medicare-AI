@@ -459,12 +459,44 @@ export default function JoinUsPage() {
       return
     }
 
-    // --- NEW: Including User Info in Submission ---
-    const submissionData = { ...formData, userEmail: session?.user?.email }
-    console.log("Submitting Data:", submissionData)
+    const submissionData = new FormData()
 
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    setSubmissionStatus("success")
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value instanceof File) {
+        submissionData.append(key, value)
+      } else if (Array.isArray(value)) {
+        submissionData.append(key, JSON.stringify(value))
+      } else if (value !== null) {
+        submissionData.append(key, String(value))
+      }
+    })
+    submissionData.append("userEmail", session?.user?.email || "")
+
+    try {
+      const response = await fetch("/api/doctor-applications", {
+        method: "POST",
+        body: submissionData,
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.message || "Something went wrong")
+      }
+
+      setSubmissionStatus("success")
+      toast({
+        title: "Application Submitted!",
+        description: "Your details have been sent for review.",
+      })
+    } catch (error: any) {
+      setSubmissionStatus("idle")
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleReset = () => {

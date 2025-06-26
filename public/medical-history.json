@@ -79,5 +79,14 @@
     "status": "Reviewed",
     "id": 9,
     "date": "2025-06-26"
+  },
+  {
+    "type": "Lab Results",
+    "diagnosis": "AI Report Analysis - Chest Pain",
+    "notes": "Your medical report indicates concerning symptoms including chest pain, high blood pressure, an abnormal heart murmur, and lung sounds suggesting potential heart and lung problems.  Your family history of early heart disease also raises concern.  The doctor suspects unstable angina (a serious heart condition) as a primary diagnosis and needs to perform further tests to confirm and rule out other possibilities.",
+    "doctor": "AI Analyzer",
+    "status": "Reviewed",
+    "id": 10,
+    "date": "2025-06-26"
   }
 ]

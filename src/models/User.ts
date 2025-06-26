@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models, Document } from "mongoose"
+import mongoose, { Schema, model, models, Document, Model } from "mongoose"
 
 export interface IUser extends Document {
   name: string
@@ -15,6 +15,18 @@ export interface IUser extends Document {
     type: "Point"
     coordinates: [number, number] // [longitude, latitude]
   }
+}
+
+// Add static method type to the model
+interface IUserModel extends Model<IUser> {
+  seedAdmins(
+    admins: Array<{
+      name: string
+      email: string
+      phoneNumber: string
+      password: string
+    }>
+  ): Promise<void>
 }
 
 const userSchema = new Schema<IUser>(
@@ -72,6 +84,28 @@ const userSchema = new Schema<IUser>(
 
 userSchema.index({ location: "2dsphere" })
 
-const User = models.User || model<IUser>("User", userSchema)
+// Static method to seed admin users
+userSchema.statics.seedAdmins = async function (
+  admins: Array<{
+    name: string
+    email: string
+    phoneNumber: string
+    password: string
+  }>
+) {
+  for (const admin of admins) {
+    const exists = await this.findOne({ phoneNumber: admin.phoneNumber })
+    if (!exists) {
+      await this.create({
+        ...admin,
+        role: "admin",
+        isVerified: true,
+      })
+    }
+  }
+}
+
+const User =
+  (models.User as IUserModel) || model<IUser, IUserModel>("User", userSchema)
 
 export default User

@@ -3,8 +3,8 @@ import User from "@/models/User"
 import NextAuth, { AuthOptions } from "next-auth"
 import { JWT } from "next-auth/jwt"
 import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from "bcrypt"
 import { generateOtp, sendOtp } from "@/lib/otp"
+import bcrypt from "bcrypt"
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -17,7 +17,7 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials) {
-          throw new Error("No credentials provided.")
+          throw new Error("Please provide your credentials.")
         }
         await connectDB()
 
@@ -30,27 +30,28 @@ export const authOptions: AuthOptions = {
         })
 
         if (!user) {
-          throw new Error("No verified user found with this email or phone.")
+          // Generic error to avoid leaking user existence
+          throw new Error("Invalid credentials.")
         }
 
+        // Use bcrypt for password check
         const isPasswordCorrect = await bcrypt.compare(
           credentials.password,
           user.password
         )
 
         if (!isPasswordCorrect) {
-          throw new Error("Incorrect password.")
+          throw new Error("Invalid credentials.")
         }
 
         // Send OTP
         const otp = generateOtp()
-        user.otp = await bcrypt.hash(otp, 10)
-        user.otpExpires = new Date(new Date().getTime() + 10 * 60 * 1000) // 10 minutes
+        user.otp = otp
+        user.otpExpires = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
         await user.save()
         await sendOtp(user.phoneNumber, otp)
 
-        // Instead of returning a user, throw a specific error
-        // to prevent session creation and signal the client.
+        // Signal to client to prompt for OTP
         throw new Error(`OTP_REQUIRED:${user.email}`)
       },
     }),
@@ -63,7 +64,7 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials) {
-          throw new Error("No credentials provided.")
+          throw new Error("Please provide your credentials.")
         }
         await connectDB()
 
@@ -80,7 +81,8 @@ export const authOptions: AuthOptions = {
           throw new Error("OTP has expired.")
         }
 
-        const isOtpCorrect = await bcrypt.compare(credentials.otp, user.otp)
+        // Plain text OTP check
+        const isOtpCorrect = credentials.otp === user.otp
 
         if (!isOtpCorrect) {
           throw new Error("Invalid OTP.")
@@ -96,21 +98,21 @@ export const authOptions: AuthOptions = {
           id: user.id,
           name: user.name,
           email: user.email,
-          // You can add other user properties here
+          role: user.role,
         }
       },
     }),
   ],
   pages: {
-    signIn: "/", // Redirect to home page for login, as we use a modal
+    signIn: "/", // Or "/login" if you want a dedicated login page
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        // This callback now only runs on successful OTP verification
         token.id = user.id
         token.name = user.name
         token.email = user.email
+        token.role = user.role
       }
       return token
     },
@@ -119,6 +121,7 @@ export const authOptions: AuthOptions = {
         session.user.id = token.id as string
         session.user.name = token.name
         session.user.email = token.email
+        session.user.role = token.role
       }
       return session
     },
