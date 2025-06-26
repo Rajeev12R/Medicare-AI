@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -60,16 +60,24 @@ const PasswordStrengthIndicator = ({ password }: { password: string }) => {
 }
 
 interface AuthModalProps {
-  children: React.ReactNode
+  isOpen: boolean
+  setIsOpen: (open: boolean) => void
+  message?: string
+  children?: React.ReactNode
   defaultTab?: "signin" | "signup"
 }
 
 type AuthStep = "details" | "otp"
 type LoginMethod = "email" | "phone"
 
-const AuthModal = ({ children, defaultTab = "signin" }: AuthModalProps) => {
-  const [open, setOpen] = useState(false)
+const AuthModal = ({ isOpen, setIsOpen, message, defaultTab = "signin" }: AuthModalProps) => {
   const [activeTab, setActiveTab] = useState<"signin" | "signup">(defaultTab)
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(defaultTab)
+    }
+  }, [isOpen, defaultTab])
 
   // Common state
   const [email, setEmail] = useState("")
@@ -230,7 +238,7 @@ const AuthModal = ({ children, defaultTab = "signin" }: AuthModalProps) => {
         toast.error(res.error)
       } else {
         toast.success("Login successful")
-        setOpen(false)
+        setIsOpen(false)
         router.refresh()
       }
     } catch (error) {
@@ -255,17 +263,13 @@ const AuthModal = ({ children, defaultTab = "signin" }: AuthModalProps) => {
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        setOpen(isOpen)
-        if (!isOpen) {
-          resetAuthState()
-        }
-      }}
-    >
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="max-w-md w-full">
+        {message && (
+          <div className="mb-4 text-center text-blue-600 font-medium">
+            {message}
+          </div>
+        )}
         <DialogHeader>
           <DialogTitle>Welcome to MediCare AI</DialogTitle>
           <DialogDescription>

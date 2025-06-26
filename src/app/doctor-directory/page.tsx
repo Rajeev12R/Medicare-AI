@@ -1,6 +1,7 @@
 "use client"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
+import { useRouter } from "next/navigation"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import {
   Table,
@@ -183,6 +184,8 @@ export default function DoctorDirectory() {
     {}
   )
 
+  const router = useRouter()
+
   return (
     <>
       <Header />
@@ -327,10 +330,18 @@ export default function DoctorDirectory() {
 
           {/* Nearby Doctors Section */}
           <Card className="bg-white dark:bg-slate-900 mt-8">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-slate-900 dark:text-slate-50">
                 Nearby Doctors by Speciality
               </CardTitle>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => router.push("/nearby-doctors")}
+                className="ml-4"
+              >
+                Look for Nearby Doctors
+              </Button>
             </CardHeader>
             <CardContent>
               {locationError && (

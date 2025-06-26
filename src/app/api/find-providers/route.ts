@@ -1,88 +1,63 @@
-import { NextRequest, NextResponse } from "next/server"
+import { GoogleGenerativeAI } from "@google/generative-ai"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../auth/[...nextauth]/route"
 import User from "@/models/User"
 import { connectDB } from "@/lib/db"
 
-function formatAddress(tags: any) {
-  // Compose a readable address from OSM tags
-  return (
-    [
-      tags?.["addr:housenumber"],
-      tags?.["addr:street"],
-      tags?.["addr:suburb"],
-      tags?.["addr:city"],
-      tags?.["addr:state"],
-      tags?.["addr:postcode"],
-    ]
-      .filter(Boolean)
-      .join(", ") || "Address not available"
-  )
-}
-
-export async function GET(req: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const { searchParams } = new URL(req.url)
-  const lat = searchParams.get("lat")
-  const lng = searchParams.get("lng")
-
-  if (!lat || !lng) {
-    return NextResponse.json(
-      { error: "Latitude and longitude are required." },
-      { status: 400 }
-    )
-  }
-
-  const latitude = parseFloat(lat)
-  const longitude = parseFloat(lng)
-
   try {
     await connectDB()
+    const user = await User.findById(session.user.id)
+    const location = user?.location
 
-    // 1. Search for registered doctors in the database
-    const doctors = await User.find({
-      role: "doctor",
-      location: {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [longitude, latitude],
-          },
-          $maxDistance: 10000, // 10 kilometers
-        },
-      },
-    })
-
-    let providers = doctors.map((doc) => ({
-      name: doc.name,
-      address: doc.address || "Address not available",
-      phone: doc.phoneNumber,
-      specialty: doc.specialty || "Registered Doctor",
-      lat: doc.location?.coordinates?.[1],
-      lng: doc.location?.coordinates?.[0],
-    }))
-
-    // 2. If no doctors are found, use Overpass API for real hospitals
-    if (providers.length === 0) {
-      const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node["amenity"="hospital"](around:5000,${latitude},${longitude});out;`
-      const overpassRes = await fetch(overpassUrl)
-      const overpassData = await overpassRes.json()
-
-      providers = (overpassData.elements || []).map((el: any) => ({
-        name: el.tags?.name || "Unknown Hospital",
-        address: formatAddress(el.tags),
-        phone: el.tags?.phone || "",
-        specialty: el.tags?.["healthcare:speciality"] || "Hospital",
-        lat: el.lat,
-        lng: el.lon,
-      }))
-      // Sort by distance (optional, since Overpass already sorts by proximity)
+    if (!location?.coordinates) {
+      return NextResponse.json(
+        { error: "No location found for this user." },
+        { status: 400 }
+      )
     }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+
+    const prompt = `
+        You are a helpful medical assistant. Based on the user's location, find relevant doctors or hospitals nearby.
+
+        User Location:
+        Latitude: ${location.coordinates[1]}
+        Longitude: ${location.coordinates[0]}
+
+        Please return a JSON array of recommended providers with the following structure:
+        [
+            {
+                "name": "Provider Name",
+                "address": "Full Address",
+                "phone": "Phone Number",
+                "specialty": "Relevant Specialty"
+            }
+        ]
+
+        Only return the JSON array of up to 10 providers.
+        `
+
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    const providersText = await response.text()
+
+    // Clean the response to ensure it's valid JSON
+    const jsonString = providersText
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim()
+
+    const providers = JSON.parse(jsonString)
 
     return NextResponse.json({ providers })
   } catch (error) {

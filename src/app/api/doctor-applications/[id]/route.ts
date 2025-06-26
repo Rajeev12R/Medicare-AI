@@ -40,19 +40,20 @@ export async function PUT(
     application.status = status
     await application.save()
 
+    let doctorId: string | undefined = undefined
     // If approved, create a corresponding user entry for the doctor
     if (status === "approved") {
-      const existingUser = await User.findOne({
+      let user = await User.findOne({
         email: application.professionalEmail,
       })
-      if (!existingUser) {
+      if (!user) {
         // This is a simplified password generation.
         // In a real-world scenario, you'd send an invitation link
         // for the doctor to set their own password.
         const tempPassword = Math.random().toString(36).slice(-8)
         const hashedPassword = await bcrypt.hash(tempPassword, 10)
 
-        await User.create({
+        user = await User.create({
           name: application.fullName,
           email: application.professionalEmail,
           password: hashedPassword,
@@ -61,13 +62,15 @@ export async function PUT(
           isVerified: true, // Assuming verification upon admin approval
         })
       }
+      doctorId = user && user._id ? user._id.toString() : undefined
     }
 
     // Send notification email
     await sendApplicationStatusEmail(
       application.professionalEmail,
       application.fullName,
-      status
+      status,
+      doctorId
     )
 
     return NextResponse.json(

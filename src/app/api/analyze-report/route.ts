@@ -4,6 +4,27 @@ import { Poppler } from "node-poppler"
 import path from "path"
 import fs from "fs/promises"
 import { recognize } from "node-tesseract-ocr"
+import os from "os"
+
+// Cross-platform Poppler instance
+let poppler: Poppler
+if (os.platform() === "win32") {
+  poppler = new Poppler(
+    path.join(
+      process.cwd(),
+      "node_modules",
+      "node-poppler",
+      "src",
+      "lib",
+      "win32",
+      "poppler-24.07.0",
+      "Library",
+      "bin"
+    )
+  )
+} else {
+  poppler = new Poppler()
+}
 
 // Do NOT import pdfjs statically. It will be imported dynamically inside the function.
 
@@ -12,14 +33,12 @@ async function extractTextFromBuffer(
   mimeType: string
 ): Promise<string> {
   if (mimeType === "application/pdf") {
-    // node-poppler needs a file path, so we write a temporary file
     const tempDir = path.join(process.cwd(), "temp")
     await fs.mkdir(tempDir, { recursive: true })
     const tempFilePath = path.join(tempDir, `upload-${Date.now()}.pdf`)
     await fs.writeFile(tempFilePath, buffer)
 
     try {
-      const poppler = new Poppler()
       const text = await poppler.pdfToText(tempFilePath)
       return text
     } catch (error) {

@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -113,7 +112,6 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -208,4 +206,29 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background-color: hsl(var(--ring));
+}
+
+@keyframes vertical-scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+.testimonial-scroll-outer {
+  overflow: hidden;
+  height: 500px;
+  position: relative;
+}
+
+.testimonial-scroll-inner {
+  display: flex;
+  flex-direction: column;
+  animation: vertical-scroll 30s linear infinite;
+}
+
+.testimonial-scroll-inner:hover {
+  animation-play-state: paused;
 }

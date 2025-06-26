@@ -1,6 +1,8 @@
 "use client";
 import { Activity, Mail, Phone, MapPin } from "lucide-react";
 import React from "react";
+import Link from "next/link";
+
 const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white py-16">
@@ -30,20 +32,22 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Services</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">AI Medical Analysis</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Speech Recognition</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Find Healthcare</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Medical Records</a></li>
+              <li><Link href="/ai-analysis" className="hover:text-white transition-colors">AI Medical Analysis</Link></li>
+              <li><Link href="/speech-analysis" className="hover:text-white transition-colors">Speech Recognition</Link></li>
+              <li><Link href="/find-care" className="hover:text-white transition-colors">Find Healthcare</Link></li>
+              <li><Link href="/medical-records" className="hover:text-white transition-colors">Medical Records</Link></li>
+              <li><Link href="/health-monitoring" className="hover:text-white transition-colors">Health Monitoring</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-lg font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
+              <li><Link href="/help-center" className="hover:text-white transition-colors">Help Center</Link></li>
+              <li><Link href="/faq" className="hover:text-white transition-colors">FAQs</Link></li>
+              <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><Link href="/contact-us" className="hover:text-white transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 
@@ -62,6 +66,9 @@ const Footer = () => {
                 <MapPin className="w-5 h-5 mr-3" />
                 <span>123 Healthcare Ave, Medical City, Mumbai</span>
               </div>
+            </div>
+            <div className="mt-6">
+              <a href="/team" className="text-lg font-semibold text-blue-400 hover:underline cursor-pointer block">Let's Meet Our Team</a>
             </div>
           </div>
         </div>

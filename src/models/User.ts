@@ -1,4 +1,18 @@
-import mongoose, { Schema, model, models, Document, Model } from "mongoose"
+import mongoose, { Schema, model, models, Document } from "mongoose"
+
+export interface IMedicalRecord extends Document {
+  type: string
+  diagnosis: string
+  doctor?: string
+  status?: string
+  date: Date
+  originalReportUrl?: string
+  analysis?: {
+    keyFindings: any
+    summary: string
+    nextSteps: string[]
+  }
+}
 
 export interface IUser extends Document {
   name: string
@@ -15,19 +29,43 @@ export interface IUser extends Document {
     type: "Point"
     coordinates: [number, number] // [longitude, latitude]
   }
+  medicalHistory: IMedicalRecord[]
+  documents: IDocument[]
 }
 
-// Add static method type to the model
-interface IUserModel extends Model<IUser> {
-  seedAdmins(
-    admins: Array<{
-      name: string
-      email: string
-      phoneNumber: string
-      password: string
-    }>
-  ): Promise<void>
+export interface IDocument extends Document {
+  name: string
+  type: string
+  date: Date
+  size: number
+  category: string
+  url: string
 }
+
+const DocumentSchema = new Schema({
+  name: { type: String, required: true },
+  type: { type: String, required: true },
+  date: { type: Date, default: Date.now },
+  size: { type: Number, required: true },
+  category: { type: String, required: true },
+  url: { type: String, required: true },
+})
+
+const MedicalRecordSchema = new Schema({
+  type: { type: String, required: true },
+  diagnosis: { type: String, required: true },
+  doctor: { type: String },
+  status: { type: String },
+  date: { type: Date, default: Date.now },
+  originalReportUrl: {
+    type: String,
+  },
+  analysis: {
+    keyFindings: Schema.Types.Mixed,
+    summary: String,
+    nextSteps: [String],
+  },
+})
 
 const userSchema = new Schema<IUser>(
   {
@@ -78,34 +116,14 @@ const userSchema = new Schema<IUser>(
         required: false,
       },
     },
+    medicalHistory: [MedicalRecordSchema],
+    documents: [DocumentSchema],
   },
   { timestamps: true }
 )
 
 userSchema.index({ location: "2dsphere" })
 
-// Static method to seed admin users
-userSchema.statics.seedAdmins = async function (
-  admins: Array<{
-    name: string
-    email: string
-    phoneNumber: string
-    password: string
-  }>
-) {
-  for (const admin of admins) {
-    const exists = await this.findOne({ phoneNumber: admin.phoneNumber })
-    if (!exists) {
-      await this.create({
-        ...admin,
-        role: "admin",
-        isVerified: true,
-      })
-    }
-  }
-}
-
-const User =
-  (models.User as IUserModel) || model<IUser, IUserModel>("User", userSchema)
+const User = models.User || model<IUser>("User", userSchema)
 
 export default User

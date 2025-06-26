@@ -58,8 +58,17 @@ Your next message as the doctor:`
     const analysis = await response.text()
 
     return NextResponse.json({ analysis })
-  } catch (error) {
+  } catch (error: any) {
     console.error(error)
+    if (error?.message?.includes("429")) {
+      return NextResponse.json(
+        {
+          error:
+            "AI usage quota exceeded. Please try again later or upgrade your plan.",
+        },
+        { status: 429 }
+      )
+    }
     return NextResponse.json(
       { error: "Failed to analyze symptoms" },
       { status: 500 }

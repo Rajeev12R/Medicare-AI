@@ -1,71 +1,71 @@
 "use client"
-import { cn } from "@/lib/utils"
-import { motion } from "motion/react"
-import { IconUpload } from "@tabler/icons-react"
-import { useDropzone } from "react-dropzone"
-import React, { useRef, useState } from "react";
-import { UploadCloud } from "lucide-react";
+import { Upload } from "lucide-react";
+import { useDropzone } from "react-dropzone";
+import { Button } from "./ui/button";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface FileUploadProps {
-  onFiles: (files: File[]) => void;
-  accept?: string;
-  multiple?: boolean;
-  disabled?: boolean;
+  onUploadSuccess: (newDocument: any) => void;
 }
 
-export default function FileUpload({
-  onFiles,
-  accept = "image/*,application/pdf",
-  multiple = true,
-  disabled = false,
-}: FileUploadProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [dragActive, setDragActive] = useState(false);
+export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    const validFiles = Array.from(files).filter(
-      (f) => f.type.startsWith("image/") || f.type === "application/pdf"
-    );
-    if (validFiles.length) onFiles(validFiles);
+  const onDrop = async (acceptedFiles?: File[]) => {
+    console.log('onDrop called with:', acceptedFiles);
+    if (!acceptedFiles || !Array.isArray(acceptedFiles) || acceptedFiles.length === 0) {
+      toast.error("No valid files selected.");
+      return;
+    }
+
+    setIsUploading(true);
+    const file = acceptedFiles[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/medical-records", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+      
+      const newDocument = await response.json();
+      toast.success("File uploaded successfully!");
+      onUploadSuccess(newDocument);
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error(error.message || "An unexpected error occurred.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "application/pdf": [".pdf"],
+      "image/jpeg": [".jpeg", ".jpg"],
+      "image/png": [".png"],
+    },
+    multiple: false,
+  });
+
   return (
-    <div
-      className={`relative flex flex-col items-center justify-center border-2 border-dashed rounded-xl transition-colors cursor-pointer min-h-[220px] px-6 py-8
-        ${dragActive ? "border-blue-500 bg-blue-50" : "border-slate-300 bg-white dark:bg-slate-900"}
-        ${disabled ? "opacity-60 pointer-events-none" : ""}
-      `}
-      onClick={() => !disabled && inputRef.current?.click()}
-      onDragOver={e => {
-        e.preventDefault();
-        setDragActive(true);
-      }}
-      onDragLeave={e => {
-        e.preventDefault();
-        setDragActive(false);
-      }}
-      onDrop={e => {
-        e.preventDefault();
-        setDragActive(false);
-        handleFiles(e.dataTransfer.files);
-      }}
-      tabIndex={0}
-      role="button"
-      aria-disabled={disabled}
-    >
-      <UploadCloud className="w-10 h-10 text-blue-500 mb-2" />
-      <div className="text-lg font-semibold text-gray-700 mb-1">Drag & drop files here</div>
-      <div className="text-sm text-gray-500 mb-2">or <span className="underline text-blue-600">click to browse</span> (PDF, JPG, PNG)</div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        multiple={multiple}
-        className="hidden"
-        onChange={e => handleFiles(e.target.files)}
-        disabled={disabled}
-      />
+    <div {...getRootProps()}>
+      <input {...getInputProps()} />
+      <Button
+        disabled={isUploading}
+        className="text-foreground bg-muted dark:bg-[#23272B] border border-border transition-all duration-200 hover:bg-muted/80 hover:shadow-md dark:hover:bg-[#23272B]/80 cursor-pointer"
+      >
+        <Upload className="w-4 h-4 mr-2" />
+        {isUploading ? "Uploading..." : isDragActive ? "Drop here..." : "Upload Document"}
+      </Button>
     </div>
   );
 }
